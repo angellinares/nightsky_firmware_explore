@@ -1,0 +1,19 @@
+{
+  "stock": "NightSky firmware 1.07",
+  "releases": [
+    {
+      "version": "1.0.0",
+      "date": "2026-11-11",
+      "build": "v16",
+      "changes": [
+        "Knob lanes: the step sequencer records nine more knobs per step. The knobs are REVERB, DRY, DEPTH, INTERVAL, LOW CUT, LENGTH, SPEED, SHIMMER and HIGH CUT.",
+        "Step recording: hold a step and turn a knob while the sequencer runs.",
+        "Live recording: press and release steps 3 and 6 together to arm it. The ON LED turns purple. A knob turn records into the step that plays.",
+        "Lane clear: hold steps 3 and 6 and turn a knob to clear the lane of that knob.",
+        "Base value: on a step with no record, a lane plays the knob position it had when you last turned it outside recording.",
+        "Presets: a preset save also saves the lanes. A preset load restores them, or clears them if the preset has none.",
+        "Knob mode: the lanes survive a power-off, the same as the stock sequence."
+      ]
+    }
+  ]
+}

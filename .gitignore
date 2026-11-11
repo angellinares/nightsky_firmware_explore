@@ -1,0 +1,34 @@
+# Allowlist. Git ignores every file, except the files listed below.
+# Do not add firmware images, decompiled output, Ghidra data or the manual.
+*
+!*/
+!.gitignore
+!.github/workflows/pages.yml
+!LICENSE
+!README.md
+!site/index.html
+!site/package.json
+!site/css/style.css
+!site/js/main.js
+!site/js/patcher.js
+!site/js/syx.js
+!site/js/nightsky-code.js
+!tools/patch/gen_site.py
+!tools/patch/history.json
+!tools/patch/test_site.mjs
+!docs/findings.md
+!docs/persistence-plan.md
+!tools/dfuse.py
+!tools/diag_read.py
+!tools/flash_read.py
+!tools/fwdb.py
+!tools/plot_lanes.py
+!tools/syx_encode.py
+!tools/syx_fw.py
+!tools/ghidra_analyze.ps1
+!tools/ghidra/ExportFw.java
+!tools/ghidra/RecoverCortexM.java
+!tools/ghidra/SeedCortexM.java
+!tools/patch/build_patch.py
+!tools/patch/cave.s
+!tools/tail_read.py

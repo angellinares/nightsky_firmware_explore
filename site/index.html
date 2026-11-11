@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NightSky Knob Lanes</title>
+<meta name="description" content="An unofficial firmware mod for the Strymon NightSky: the step sequencer records nine more knobs per step.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <h1>NightSky Knob Lanes</h1>
+  <div class="meta">Patch <span id="ver">–</span> · build <span id="build">–</span> · for NightSky firmware 1.07 · unofficial</div>
+  <nav class="toc">
+    <a href="#patch">Patch</a><a href="#install">Install</a><a href="#manual">Manual</a>
+    <a href="#limits">Limits</a><a href="#restore">Restore stock</a><a href="#changelog">Changelog</a>
+  </nav>
+</header>
+
+<main>
+<div class="note">
+  <p><strong>Unofficial.</strong> Strymon does not make, test or support this mod. You flash it at your own risk.</p>
+  <p><strong>Control side only.</strong> The mod changes the controller firmware: the processor that reads the knobs, buttons, LEDs and MIDI, and runs the sequencer. It does not change the DSP firmware or any audio code. The reverb algorithms stay stock.</p>
+</div>
+
+<section id="patch">
+  <h2>Patch</h2>
+  <p>The page patches your own copy of the stock controller update. The page does not upload the file. All work happens in your browser.</p>
+  <label class="drop" id="drop">
+    <input type="file" id="file" accept=".syx">
+    <strong>Select or drop <code>1305_0107_fwu.syx</code></strong>
+    <span>The stock NightSky 1.07 controller update. Install steps 3 and 4 say where to find it.</span>
+  </label>
+  <ul class="log" id="log"></ul>
+  <a class="btn" id="dl" hidden download="1305_0107_fwu.syx">Download the patched 1305_0107_fwu.syx</a>
+</section>
+
+<section id="install">
+  <h2>Install</h2>
+  <p>The Strymon Update app flashes the patched file. The app reinstalls the update file from its download folder. You put the patched file in that folder for one install. These steps are for the Windows app.</p>
+  <ol>
+    <li>Connect the NightSky with USB. Open the Strymon Update app.</li>
+    <li>Wait until the app shows NightSky 1.07 and the <kbd>REINSTALL UPDATE</kbd> button is active.</li>
+    <li>Open this folder in File Explorer:<br><code>%LOCALAPPDATA%\Packages\StrymonUpdate_e621bjepz8q54\LocalState\Strymon\Updater\V2\r_3\1305\</code><br>The folder name can differ on your computer. If so, search <code>LocalState</code> for <code>1305_0107_fwu.syx</code>.</li>
+    <li>Copy <code>1305_0107_fwu.syx</code> to a safe place. This is your stock file. Patch this copy above.</li>
+    <li>Put the patched file in the folder, in place of the stock file. Keep the name <code>1305_0107_fwu.syx</code>.</li>
+    <li>Set the patched file to read-only: right-click, Properties, Read-only. Otherwise the app can replace it.</li>
+    <li>Click <kbd>REINSTALL UPDATE</kbd>. Wait until the app says the update is done.</li>
+    <li>Disconnect the power from the pedal, then connect it again.</li>
+    <li>Quit the app. Make sure that the app is not still running in the background.</li>
+    <li>Clear the read-only setting. Put your stock file back in the folder. The app then works as before.</li>
+  </ol>
+  <div class="note"><p>Do not touch <code>1305_0107_fwd.syx</code>. That file is the DSP update. The mod does not use it.</p></div>
+</section>
+
+<section id="manual">
+  <h2>Manual</h2>
+  <p>The stock sequencer plays a SIZE/PITCH value on each of its 8 steps. The mod adds a <em>lane</em> for nine more knobs. A lane holds one value per step for one knob. On each step, every lane with records sends its value. The stock SIZE/PITCH sequence works as before.</p>
+  <p>Knobs with a lane: REVERB, DRY, DEPTH, INTERVAL, LOW CUT, LENGTH, SPEED, SHIMMER and HIGH CUT.</p>
+
+  <figure>
+    <svg viewBox="0 0 640 210" role="img" aria-label="The 8 step buttons. Steps 3 and 6 form the chord for live recording. The ON LED turns purple while live recording is armed.">
+      <rect x="10" y="10" width="620" height="190" rx="10" class="soft"/>
+      <g id="steps"></g>
+      <path d="M 166 62 v -18 h 228 v 18" class="acc-stroke" stroke-width="2"/>
+      <text x="280" y="38" text-anchor="middle">hold 3 + 6 together</text>
+      <circle cx="140" cy="168" r="14" class="acc"/>
+      <text x="164" y="164">ON LED: purple while live recording is armed</text>
+      <text x="164" y="180" class="small">The LED returns to its normal colour when you disarm.</text>
+    </svg>
+    <figcaption>Figure 1. The 8 step buttons (the preset buttons). Steps 3 and 6 form the chord.</figcaption>
+  </figure>
+
+  <h3>Gestures</h3>
+  <div class="wrap"><table>
+    <tr><th>You do</th><th>Result</th></tr>
+    <tr><td>Hold one step and turn a knob, with the sequencer running</td><td>The knob value goes into that step of the knob's lane.</td></tr>
+    <tr><td>Press and release steps 3 and 6 together, without a knob turn</td><td>Live recording turns on or off. While it is on, the ON LED is purple.</td></tr>
+    <tr><td>Turn a knob while live recording is on</td><td>The value goes into the step that plays now.</td></tr>
+    <tr><td>Hold steps 3 and 6 and turn a knob</td><td>The lane of that knob is cleared. The knob position becomes its base value. This works when the sequencer is stopped too.</td></tr>
+    <tr><td>Turn a knob, no step held, live recording off</td><td>The knob position becomes the lane's base value.</td></tr>
+  </table></div>
+  <p>A step with no record plays the base value of the lane. So the knob returns to its base position between recorded steps.</p>
+
+  <figure>
+    <svg viewBox="0 0 640 190" role="img" aria-label="Example lanes on 8 steps. Recorded steps show their value. Steps without a record play the base value.">
+      <g id="lanes"></g>
+    </svg>
+    <figcaption>Figure 2. Three example lanes. Filled bars are records. A dashed line is the base value, played on steps without a record.</figcaption>
+  </figure>
+
+  <h3>Presets and power-off</h3>
+  <ul>
+    <li><strong>Save.</strong> A preset save (hold FAVORITE until the LED flashes blue, then pick the location) also saves the lanes.</li>
+    <li><strong>Load.</strong> A preset load restores the lanes saved with that preset. A preset without lanes clears them.</li>
+    <li><strong>Back to knob mode.</strong> The lanes stay as they are.</li>
+    <li><strong>Power-off in knob mode.</strong> The lanes come back at the next power-up, the same as the stock sequence.</li>
+    <li>There is no separate save action. The lanes save only with the stock preset save, and with the stock knob-mode state.</li>
+  </ul>
+
+  <figure>
+    <svg viewBox="0 0 640 222" role="img" aria-label="Storage: each preset slot keeps its stock data and, in its unused tail, the lane record. The knob-mode lanes sit in a ring beside the stock knob-mode ring.">
+      <text x="20" y="28">Preset slot (one per preset, 2 KB)</text>
+      <rect x="20" y="38" width="380" height="34" class="soft"/><rect x="20" y="38" width="380" height="34" class="stroke"/>
+      <text x="210" y="60" text-anchor="middle">stock preset data</text>
+      <rect x="400" y="38" width="104" height="34" class="stroke"/><text x="452" y="60" text-anchor="middle" class="small">unused</text>
+      <rect x="504" y="38" width="66" height="34" class="acc-soft"/><rect x="504" y="38" width="66" height="34" class="acc-stroke"/>
+      <text x="537" y="60" text-anchor="middle">lanes</text>
+      <rect x="570" y="38" width="50" height="34" class="stroke"/>
+      <text x="20" y="92" class="small">The lane record goes in the unused end of the slot. It is checked against the preset it was saved with.</text>
+      <text x="20" y="130">Knob mode (rings of 1024 pages)</text>
+      <g id="ring"></g>
+      <text x="20" y="212" class="small">Each stock knob-state page gets a lane page with the same number and the same write counter.</text>
+    </svg>
+    <figcaption>Figure 3. Where the lanes are kept in the pedal's external flash memory.</figcaption>
+  </figure>
+</section>
+
+<section id="limits">
+  <h2>Limits</h2>
+  <ul>
+    <li>The Strymon app backs up and restores the stock preset data only. A preset backup does not include its lanes.</li>
+    <li>If the app writes a preset, the lanes saved with the old version of that preset do not load. The mod checks each lane record against its preset.</li>
+    <li>A factory reset of the presets erases the lanes of the presets.</li>
+    <li>The mod is for firmware 1.07 only. The page refuses any other file.</li>
+  </ul>
+</section>
+
+<section id="restore">
+  <h2>Restore stock</h2>
+  <p>Do the Install steps with your stock <code>1305_0107_fwu.syx</code> in the folder. You can also update to a newer Strymon firmware when one is available. Both replace the mod.</p>
+  <p>The lane records stay in the flash memory, but stock firmware ignores them.</p>
+</section>
+
+<section id="changelog">
+  <h2>Changelog</h2>
+  <div id="releases"></div>
+</section>
+</main>
+
+<footer>
+  <p>Not affiliated with Strymon. Strymon and NightSky are trademarks of their owner. This site holds no Strymon firmware or code: it carries only the mod's own code and patches the file that you supply.</p>
+  <p>Source, notes and licence (AGPL-3.0-or-later): <a href="https://github.com/angellinares/nightsky_firmware_explore">github.com/angellinares/nightsky_firmware_explore</a></p>
+</footer>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
