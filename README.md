@@ -1,4 +1,4 @@
-# NightSky Knob Lanes
+# NightSky Firmware Explore
 
 An exploration of new features for the Strymon NightSky reverb pedal, through
 changes to its firmware. This is an unofficial project. Strymon does not make,
