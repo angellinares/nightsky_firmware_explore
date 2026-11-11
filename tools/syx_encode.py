@@ -14,11 +14,11 @@ Self-integrity CRC-32 note: the stock .syx does NOT carry the word at
 .syx only needs correct per-block sums, not the integrity CRC.
 
     python syx_encode.py verify TEMPLATE.syx         # rebuild + byte-diff
-    python syx_encode.py build  TEMPLATE.syx IMG.bin OUT.syx
+
+To encode a patched image, call build_full (tools/patch/build_patch.py does).
 """
 from __future__ import annotations
 import struct, sys
-sys.path.insert(0, __file__.rsplit("\\", 1)[0] if "\\" in __file__ else ".")
 from syx_fw import split_sysex, unpack7, HEADER_LEN
 
 
@@ -49,15 +49,14 @@ def build_data_record(c1: int, off: int, data: bytes) -> bytes:
     return struct.pack("<BBIII", 1, c1, off, len(data), chk) + data
 
 
-def rebuild(template: bytes, image: bytes | None = None) -> bytes:
-    """Rebuild a .syx. If image is None, re-emit the template's own data.
+def rebuild(template: bytes) -> bytes:
+    """Re-emit the template's own data, to check the encoder.
 
     Marker/empty messages are copied verbatim. Data messages are regenerated
-    from the image (or the template's decoded data) and re-packed with the
-    same 8-byte SysEx header and trailing F7 as the template message.
+    from the template's decoded data and re-packed with the same 8-byte SysEx
+    header and trailing F7 as the template message.
     """
     out = bytearray()
-    img_pos = 0
     for m in split_sysex(template):
         if len(m) <= HEADER_LEN + 1:
             out += m
@@ -67,11 +66,7 @@ def rebuild(template: bytes, image: bytes | None = None) -> bytes:
             out += m                     # marker: copy verbatim
             continue
         _one, c1, off, ln, _chk = struct.unpack_from("<BBIII", d, 0)
-        if image is None:
-            data = bytes(d[14:14 + ln])
-        else:
-            data = image[img_pos:img_pos + ln]
-            img_pos += ln
+        data = bytes(d[14:14 + ln])
         rec = build_data_record(c1, off, data)
         # preserve any trailing padding the original record carried after data
         tail = bytes(d[14 + ln:])
@@ -148,7 +143,7 @@ def build_full(template: bytes, image: bytes, block: int = 256,
 def main(argv):
     if len(argv) >= 3 and argv[1] == "verify":
         tpl = open(argv[2], "rb").read()
-        rebuilt = rebuild(tpl, image=None)
+        rebuilt = rebuild(tpl)
         same = rebuilt == tpl
         print(f"template {len(tpl)} bytes, rebuilt {len(rebuilt)} bytes")
         print("BYTE-FOR-BYTE IDENTICAL" if same else "MISMATCH")
@@ -161,13 +156,6 @@ def main(argv):
             if len(tpl) != len(rebuilt):
                 print(f"length differs: {len(tpl)} vs {len(rebuilt)}")
         return 0 if same else 1
-    if len(argv) >= 5 and argv[1] == "build":
-        tpl = open(argv[2], "rb").read()
-        img = open(argv[3], "rb").read()
-        out = rebuild(tpl, image=img)
-        open(argv[4], "wb").write(out)
-        print(f"wrote {len(out)} bytes -> {argv[4]}")
-        return 0
     print(__doc__)
     return 2
 

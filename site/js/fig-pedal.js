@@ -2,7 +2,7 @@
  * Top view of the NightSky as a line drawing, laid out after the front-panel
  * drawings in the NightSky user manual (pages 4 and 19). Line work only, no
  * shading. Only the LEDs that matter for live recording are drawn lit.
- * Colours come from CSS classes: .stroke .paper .muted-t (line work),
+ * Colours come from CSS classes: .stroke .paper (line work),
  * .led-red .led-amber .acc .acc-stroke (accents).
  *
  * drawPedal(svg, state) with state:
@@ -14,7 +14,8 @@
  *   knob:    knob name | null  knob the player turns (ring and arrow)
  */
 const NS = "http://www.w3.org/2000/svg";
-function el(tag, attrs, parent, text) {
+/** Append an SVG element with ATTRS (and optional TEXT) to PARENT. */
+export function el(tag, attrs, parent, text) {
   const e = document.createElementNS(NS, tag);
   for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
   if (text !== undefined) e.textContent = text;

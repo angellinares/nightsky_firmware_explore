@@ -1,16 +1,8 @@
 import { patch } from "./patcher.js";
 import { PATCH } from "./nightsky-code.js";
-import { drawLiveRecordingFigure } from "./fig-pedal.js";
+import { drawLiveRecordingFigure, el } from "./fig-pedal.js";
 
 const $ = (id) => document.getElementById(id);
-const NS = "http://www.w3.org/2000/svg";
-function el(tag, attrs, parent, text) {
-  const e = document.createElementNS(NS, tag);
-  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
-  if (text !== undefined) e.textContent = text;
-  parent.appendChild(e);
-  return e;
-}
 
 /* ---- version and changelog ---- */
 $("ver").textContent = PATCH.version;

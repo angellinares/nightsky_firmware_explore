@@ -2,8 +2,8 @@
 """Build the reverb-per-step (live) patched NightSky controller image + .syx.
 
 Steps:
- 1. Assemble cave.s (WSL arm-none-eabi-gcc) -> flat blob + T1/T2 offsets.
- 2. Splice the cave at CAVE_OFF and patch the two hook sites with bl.
+ 1. Assemble cave.s (WSL arm-none-eabi-gcc) -> flat blob + symbol offsets.
+ 2. Decode the stock .syx, splice the cave at CAVE_OFF, patch the hook sites.
  3. Rebuild a flashable .syx with tools/syx_encode.build_full.
  4. Verify: .syx decodes back to the patched image; disassemble patched sites.
 
@@ -17,17 +17,14 @@ import syx_fw, syx_encode
 from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB
 
 IMG_BASE   = 0x0800C000
-STOCK_BIN  = os.path.join(ROOT, "out", "fwu_v107.bin")
 STOCK_SYX  = os.path.join(ROOT, "firmware-backup", "v1.07", "1305_0107_fwu.syx")
 OUT_BIN    = os.path.join(ROOT, "out", "fwu_v107_revstep.bin")
 OUT_SYX    = os.path.join(ROOT, "out", "fwu_v107_revstep.syx")
 
 CAVE_ADDR  = 0x08023500
 CAVE_OFF   = CAVE_ADDR - IMG_BASE            # 0x17500
-HOOK_PLAY  = 0x08019E3C                        # displaces bl 0x08019B7C
 HOOK_REC   = 0x080132A2                        # dsp_send_param entry; displaces ldr r3,[..];ldrb r3,[r3]
 HOOK_CC    = 0x080144F8                        # CC handler entry (b.w); displaces cmp r0,#0x51; push {r4-r6,lr}
-HOOK_Q     = 0x08013230                        # DSP funnel entry (b.w); displaces ldr r3,[..]; ldrb r3,[r3]
 HOOK_POLL  = 0x08015C48                        # param_input_router entry (b.w); displaces push.w {r4-r11,lr}
 HOOK_LOAD  = 0x080121C4                        # FUN_080121c4 preset load entry (b.w); displaces push {r3-r5,lr}; mov r4,r0
 HOOK_SAVE  = 0x080124A0                        # FUN_080124a0 preset save entry (b.w); displaces push {r3-r5,lr}; mov r4,r0
@@ -98,17 +95,20 @@ def assemble():
         if len(parts) == 3 and parts[1] in ("t", "T"):
             syms[parts[2]] = int(parts[0], 16)
     blob = open(binf, "rb").read()
-    print(f"  cave assembled: {len(blob)} bytes, T1=+0x{syms.get('T1',0):x} T2=+0x{syms.get('T2',0):x}")
+    print(f"  cave assembled: {len(blob)} bytes, T2=+0x{syms['T2']:x}")
     return blob, syms
+
+def stock_image():
+    """The stock controller image, decoded from the stock .syx."""
+    return syx_fw.decode(open(STOCK_SYX, "rb").read())
 
 def main():
     print("[1] BL encoder"); selftest_bl()
     print("[2] assemble cave"); cave, syms = assemble()
-    t1 = CAVE_ADDR + syms["T1"] if "T1" in syms else None
     t2 = CAVE_ADDR + syms["T2"]
 
     print("[3] splice image")
-    img = bytearray(open(STOCK_BIN, "rb").read())
+    img = bytearray(stock_image())
     assert CAVE_OFF >= len(img), "cave overlaps image"
     img += b"\xFF" * (CAVE_OFF - len(img))        # pad to cave
     img += cave                                    # place cave
@@ -116,17 +116,13 @@ def main():
     def patch(addr, target_sym):
         off = addr - IMG_BASE
         img[off:off+4] = thumb_bl(addr, target_sym)
-    if t1 is not None:
-        patch(HOOK_PLAY, t1)
+    off = HOOK_REC - IMG_BASE
+    assert img[off:off+4] == bytes.fromhex("104b1b78"), "record hook site bytes unexpected"
     patch(HOOK_REC,  t2)
     if "DIAG" in syms:
         off = HOOK_CC - IMG_BASE
         assert img[off:off+4] == bytes.fromhex("512870b5"), "CC hook site bytes unexpected"
         img[off:off+4] = thumb_bw(HOOK_CC, CAVE_ADDR + syms["DIAG"])
-    if "HOOKQ" in syms:
-        off = HOOK_Q - IMG_BASE
-        assert img[off:off+4] == bytes.fromhex("024b1b78"), "DSP funnel hook site bytes unexpected"
-        img[off:off+4] = thumb_bw(HOOK_Q, CAVE_ADDR + syms["HOOKQ"])
     if "POLL" in syms:
         off = HOOK_POLL - IMG_BASE
         assert img[off:off+4] == bytes.fromhex("2de9f04f"), "router entry bytes unexpected"
@@ -164,7 +160,9 @@ def main():
     syx = syx_encode.build_full(tpl, bytes(img), region_crc=crc)
     open(OUT_SYX, "wb").write(syx)
     back = syx_fw.decode(syx)
-    print(f"  {OUT_SYX}: {len(syx)} bytes; decode round-trip ok = {back == bytes(img)}")
+    if back != bytes(img):
+        raise SystemExit("the .syx does not decode back to the patched image")
+    print(f"  {OUT_SYX}: {len(syx)} bytes; decode round-trip ok")
 
     print("[5] verify patched sites + cave")
     md = Cs(CS_ARCH_ARM, CS_MODE_THUMB)
@@ -173,14 +171,9 @@ def main():
         print(f"  --- {label} @ 0x{addr:08X} ---")
         for ins in md.disasm(bytes(img[off:off+n]), addr):
             print(f"    0x{ins.address:08X}: {ins.bytes.hex():10s} {ins.mnemonic} {ins.op_str}")
-    show(HOOK_PLAY, 4, "playback hook (expect bl T1)" if t1 else "old playback site (expect stock bl 0x08019B7C)")
     show(HOOK_REC, 4, "record hook (expect bl T2)")
     if "DIAG" in syms:
         show(HOOK_CC, 4, f"CC hook (expect b.w DIAG @ 0x{CAVE_ADDR + syms['DIAG']:08X})")
-    if "HOOKQ" in syms:
-        show(HOOK_Q, 4, f"DSP funnel hook (expect b.w HOOKQ @ 0x{CAVE_ADDR + syms['HOOKQ']:08X})")
-    else:
-        show(HOOK_Q, 4, "DSP funnel (expect stock ldr r3 / ldrb r3)")
     if "POLL" in syms:
         show(HOOK_POLL, 4, f"router entry hook (expect b.w POLL @ 0x{CAVE_ADDR + syms['POLL']:08X})")
     if "LDHOOK" in syms:
@@ -192,8 +185,6 @@ def main():
     if "JRHOOK" in syms:
         show(HOOK_JR, 4, f"ring write hook (expect b.w JRHOOK @ 0x{CAVE_ADDR + syms['JRHOOK']:08X})")
         show(CAVE_ADDR + syms["STOCK_JR"], 0x10, "STOCK_JR trampoline")
-    if t1:
-        show(t1, 0x40, "T1 cave")
     show(t2, 0x60, "T2 cave")
 
 if __name__ == "__main__":

@@ -94,11 +94,6 @@ footer p { margin: 4px 0; }
 .pedal-fig .state { display: grid; gap: 8px; min-width: 0; }
 .pedal-fig .tag { font: 600 13px/1.4 var(--mono); }
 .pedal-fig .say { margin: 0; font-size: 14px; max-width: 68ch; }
-.pedal-fig svg { display: block; width: 100%; height: auto; }
-.pedal-fig svg .stroke { stroke: var(--fg); fill: none; }
-.pedal-fig svg .paper { fill: var(--bg); }
-.pedal-fig svg .acc { fill: var(--accent); }
-.pedal-fig svg .acc-stroke { stroke: var(--accent); fill: none; }
 .pedal-fig svg .led-red { fill: var(--led-red); }
 .pedal-fig svg .led-amber { fill: var(--led-amber); }
 .pedal-fig .blink { animation: ns-blink 1s steps(1, end) infinite; }

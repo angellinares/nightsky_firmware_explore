@@ -9,14 +9,9 @@ CC 121/122/123 set the address (bits 20..14, 13..7, 6..0). CC 120 = c reads
 Needs a debug build (build_patch.py --debug). Quit the Strymon app first.
 """
 import sys, time
-from diag_read import open_ports, HDR
+from diag_read import open_ports, send_cc, HDR
 
 WIN = 0x1000
-
-
-def send_cc(mo, cc, value):
-    for ch in range(16):
-        mo.send_message([0xB0 | ch, cc, value])
 
 
 def set_addr(mo, addr):

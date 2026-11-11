@@ -2,6 +2,15 @@
   "stock": "NightSky firmware 1.07",
   "releases": [
     {
+      "version": "1.0.1",
+      "date": "2026-11-11",
+      "build": "v17",
+      "changes": [
+        "A preset load, or the return to knob mode, turns live recording off. The knob values that the load sends are no longer recorded into the step that plays.",
+        "When live recording turns off, the ON LED gets back its latest stock colour, also when the pedal changed that LED while live recording was on."
+      ]
+    },
+    {
       "version": "1.0.0",
       "date": "2026-11-11",
       "build": "v16",
