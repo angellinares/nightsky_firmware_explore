@@ -6,6 +6,8 @@
   --soft: #f4f4f4;
   --accent: #8a2be2;        /* the ON LED colour while live recording is armed */
   --accent-soft: #efe4fb;
+  --led-red: #e5484d;       /* stock LED colours, used in Figure 1 */
+  --led-amber: #f0a020;
   --ok: #1f7a3a;
   --bad: #b3261e;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -14,7 +16,8 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #0f0f0f; --fg: #ededed; --muted: #9a9a9a; --line: #2e2e2e; --soft: #181818;
-    --accent: #b47cff; --accent-soft: #2a1d3d; --ok: #6cc788; --bad: #ff8a80;
+    --accent: #b47cff; --accent-soft: #2a1d3d; --led-red: #ff6369; --led-amber: #ffb224;
+    --ok: #6cc788; --bad: #ff8a80;
   }
 }
 * { box-sizing: border-box; }
@@ -85,3 +88,25 @@ svg text.mono { font-family: var(--mono); font-size: 10.5px; }
 footer { padding-top: 32px; padding-bottom: 48px; font-size: 13px; color: var(--muted);
   border-top: 1px solid var(--line); margin-top: 40px; }
 footer p { margin: 4px 0; }
+
+/* Figure 1: the pedal top view */
+.pedal-fig { display: grid; gap: 20px; }
+.pedal-fig .state { display: grid; gap: 8px; min-width: 0; }
+.pedal-fig .tag { font: 600 13px/1.4 var(--mono); }
+.pedal-fig .say { margin: 0; font-size: 14px; max-width: 68ch; }
+.pedal-fig svg { display: block; width: 100%; height: auto; }
+.pedal-fig svg .stroke { stroke: var(--fg); fill: none; }
+.pedal-fig svg .paper { fill: var(--bg); }
+.pedal-fig svg .acc { fill: var(--accent); }
+.pedal-fig svg .acc-stroke { stroke: var(--accent); fill: none; }
+.pedal-fig svg .led-red { fill: var(--led-red); }
+.pedal-fig svg .led-amber { fill: var(--led-amber); }
+.pedal-fig .blink { animation: ns-blink 1s steps(1, end) infinite; }
+@keyframes ns-blink { 50% { opacity: 0.15; } }
+@media (prefers-reduced-motion: reduce) { .pedal-fig .blink { animation: none; } }
+.pedal-fig svg text { font-family: var(--sans); fill: var(--fg); }
+.pedal-fig svg text.tab { font-size: 24px; font-weight: 600; letter-spacing: 0.06em; fill: var(--muted); }
+.pedal-fig svg text.grp { font-size: 17px; font-weight: 700; letter-spacing: 0.06em; }
+.pedal-fig svg text.knob { font-size: 22px; font-weight: 600; letter-spacing: 0.03em; }
+.pedal-fig svg text.led { font-size: 17px; }
+.pedal-fig figcaption { margin-top: 0; }

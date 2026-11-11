@@ -58,17 +58,18 @@
   <p>The stock sequencer plays a SIZE/PITCH value on each of its 8 steps. The mod adds a <em>lane</em> for nine more knobs. A lane holds one value per step for one knob. On each step, every lane with records sends its value. The stock SIZE/PITCH sequence works as before.</p>
   <p>Knobs with a lane: REVERB, DRY, DEPTH, INTERVAL, LOW CUT, LENGTH, SPEED, SHIMMER and HIGH CUT.</p>
 
-  <figure>
-    <svg viewBox="0 0 640 210" role="img" aria-label="The 8 step buttons. Steps 3 and 6 form the chord for live recording. The ON LED turns purple while live recording is armed.">
-      <rect x="10" y="10" width="620" height="190" rx="10" class="soft"/>
-      <g id="steps"></g>
-      <g id="legend">
-        <circle cx="14" cy="14" r="14" class="acc"/>
-        <text x="38" y="10">ON LED: purple while live recording is armed</text>
-        <text x="38" y="26" class="small">The LED returns to its normal colour when you disarm.</text>
-      </g>
-    </svg>
-    <figcaption>Figure 1. The 8 step buttons (the preset buttons). Steps 3 and 6 form the chord.</figcaption>
+  <figure class="pedal-fig">
+    <div class="state">
+      <div class="tag">1 · Sequencer running, live recording off</div>
+      <svg id="pedal-before" role="img" aria-label="NightSky top view. The ON LED is red. The FAVORITE LED blinks red. Steps 1 to 6 and 8 are amber, step 4 is red. Steps 3 and 6 are marked to press."></svg>
+      <p class="say">Press and release steps <b>3</b> and <b>6</b> together. Do not turn a knob.</p>
+    </div>
+    <div class="state">
+      <div class="tag">2 · Live recording armed</div>
+      <svg id="pedal-after" role="img" aria-label="NightSky top view. The ON LED is purple. The FAVORITE LED still blinks red. The step LEDs are unchanged, step 5 plays. The LENGTH knob is marked to turn."></svg>
+      <p class="say">The ON LED turns purple. The FAVORITE LED keeps blinking red, because the sequencer still runs. The step LEDs do not change. Turn a lane knob, here LENGTH: its value goes into the step that plays. Press 3 and 6 again to disarm. The ON LED turns red again.</p>
+    </div>
+    <figcaption>Figure 1. Arming live recording. Amber steps are active, the red step plays now, and a dashed ring marks a button to press. Top view, schematic. Only the LEDs that matter here are drawn lit.</figcaption>
   </figure>
 
   <h3>Gestures</h3>

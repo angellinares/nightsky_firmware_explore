@@ -1,5 +1,6 @@
 import { patch } from "./patcher.js";
 import { PATCH } from "./nightsky-code.js";
+import { drawLiveRecordingFigure } from "./fig-pedal.js";
 
 const $ = (id) => document.getElementById(id);
 const NS = "http://www.w3.org/2000/svg";
@@ -24,22 +25,8 @@ for (const r of PATCH.history) {
   $("releases").appendChild(div);
 }
 
-/* ---- figure 1: step buttons ---- */
-{
-  const g = $("steps");
-  const sx = (i) => 82 + i * 68;                  // centre of step i + 1, row centred on 320
-  const a = sx(2), b = sx(5);                     // steps 3 and 6
-  el("path", { d: `M ${a} 66 V 50 H ${b} V 66`, class: "acc-stroke", "stroke-width": 2 }, g);
-  el("text", { x: (a + b) / 2, y: 42, "text-anchor": "middle" }, g, "hold 3 + 6 together");
-  for (let i = 0; i < 8; i++) {
-    const x = sx(i), chord = i === 2 || i === 5;
-    el("circle", { cx: x, cy: 92, r: 20, class: chord ? "acc" : "paper" }, g);
-    el("circle", { cx: x, cy: 92, r: 20, class: chord ? "acc-stroke" : "stroke", "stroke-width": 1.5 }, g);
-    el("text", { x, y: 132, "text-anchor": "middle" }, g, String(i + 1));
-  }
-  const legend = $("legend"), box = legend.getBBox();   // centre the legend under the row
-  legend.setAttribute("transform", `translate(${320 - box.width / 2}, 154)`);
-}
+/* ---- figure 1: the pedal before and after arming live recording ---- */
+drawLiveRecordingFigure($("pedal-before"), $("pedal-after"));
 
 /* ---- figure 2: example lanes ---- */
 {
