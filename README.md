@@ -9,8 +9,10 @@ records nine more knobs per step: REVERB, DRY, DEPTH, INTERVAL, LOW CUT,
 LENGTH, SPEED, SHIMMER and HIGH CUT. The stock SIZE/PITCH sequence works as
 before. The lanes save with presets and survive a power-off.
 
-**Patcher, manual and changelog:** the `site/` page, published with GitHub
-Pages. It patches your own copy of the firmware in your browser.
+**Patcher, manual and changelog:**
+<https://angellinares.github.io/nightsky_firmware_explore/>. The page
+patches your own copy of the firmware in your browser. Its source is in
+`site/`.
 
 ## Control side only
 
