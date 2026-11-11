@@ -32,3 +32,19 @@
 !tools/patch/build_patch.py
 !tools/patch/cave.s
 !tools/tail_read.py
+
+# Agent and assistant instruction files are never published. These rules come
+# last, so they win over any allowlist line above.
+.claude/
+**/.claude/
+CLAUDE.md
+CLAUDE.local.md
+**/CLAUDE.md
+**/CLAUDE.local.md
+AGENTS.md
+**/AGENTS.md
+GEMINI.md
+**/GEMINI.md
+.cursorrules
+.cursor/
+**/.github/copilot-instructions.md
