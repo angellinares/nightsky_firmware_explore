@@ -37,7 +37,7 @@ def main():
         print(r.stdout, r.stderr)
         sys.exit("release build failed")
     stock_syx = open(bp.STOCK_SYX, "rb").read()
-    stock = open(bp.STOCK_BIN, "rb").read()
+    stock = bp.stock_image()
     img = open(bp.OUT_BIN, "rb").read()
     out_syx = open(bp.OUT_SYX, "rb").read()
 

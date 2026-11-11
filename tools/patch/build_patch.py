@@ -2,8 +2,8 @@
 """Build the reverb-per-step (live) patched NightSky controller image + .syx.
 
 Steps:
- 1. Assemble cave.s (WSL arm-none-eabi-gcc) -> flat blob + T1/T2 offsets.
- 2. Splice the cave at CAVE_OFF and patch the two hook sites with bl.
+ 1. Assemble cave.s (WSL arm-none-eabi-gcc) -> flat blob + symbol offsets.
+ 2. Decode the stock .syx, splice the cave at CAVE_OFF, patch the hook sites.
  3. Rebuild a flashable .syx with tools/syx_encode.build_full.
  4. Verify: .syx decodes back to the patched image; disassemble patched sites.
 
@@ -17,7 +17,6 @@ import syx_fw, syx_encode
 from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB
 
 IMG_BASE   = 0x0800C000
-STOCK_BIN  = os.path.join(ROOT, "out", "fwu_v107.bin")
 STOCK_SYX  = os.path.join(ROOT, "firmware-backup", "v1.07", "1305_0107_fwu.syx")
 OUT_BIN    = os.path.join(ROOT, "out", "fwu_v107_revstep.bin")
 OUT_SYX    = os.path.join(ROOT, "out", "fwu_v107_revstep.syx")
@@ -101,6 +100,10 @@ def assemble():
     print(f"  cave assembled: {len(blob)} bytes, T1=+0x{syms.get('T1',0):x} T2=+0x{syms.get('T2',0):x}")
     return blob, syms
 
+def stock_image():
+    """The stock controller image, decoded from the stock .syx."""
+    return syx_fw.decode(open(STOCK_SYX, "rb").read())
+
 def main():
     print("[1] BL encoder"); selftest_bl()
     print("[2] assemble cave"); cave, syms = assemble()
@@ -108,7 +111,7 @@ def main():
     t2 = CAVE_ADDR + syms["T2"]
 
     print("[3] splice image")
-    img = bytearray(open(STOCK_BIN, "rb").read())
+    img = bytearray(stock_image())
     assert CAVE_OFF >= len(img), "cave overlaps image"
     img += b"\xFF" * (CAVE_OFF - len(img))        # pad to cave
     img += cave                                    # place cave
