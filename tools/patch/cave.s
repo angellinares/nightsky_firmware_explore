@@ -1,4 +1,4 @@
-@ NightSky per-step knob lanes - v16.
+@ NightSky per-step knob lanes - v17.
 @ v10: chord moved to steps 3+6 (1+8 is the stock Expression setup), the ON
 @ LED is purple while live recording is armed, clearing a lane or the first
 @ record sets the lane's base.
@@ -7,6 +7,8 @@
 @ knob-state ring keeps the knob-mode lanes through a power-off.
 @ v16: the debug parts (MIDI CC readout, counters, stack paint) build only
 @ with DEBUG=1 (build_patch.py --debug).
+@ v17: a preset or knob-mode load turns live recording off. While armed, the
+@ ON LED keeps the latest stock colour to give back on disarm.
 @
 @ Nine knob lanes (REVERB, DRY, DEPTH, INTERVAL, LOW CUT, LENGTH, SPEED,
 @ SHIMMER, HIGH CUT), recorded per sequencer step, played back on every step.
@@ -422,8 +424,10 @@ P_end:
     .pool
 
 @ ================= LDHOOK: FUN_080121c4 entry (preset load) =================
-@ Entered via b.w from 0x080121C4. r0 = preset. Counts the call and keeps
-@ the preset number. p = 0x7F (back to knob mode) or p >= 0x12D: stock only,
+@ Entered via b.w from 0x080121C4. r0 = preset. Every load first turns live
+@ recording off and gives the ON LED its colour back, so the knob values that
+@ the stock load sends are not recorded into the playing step.
+@ p = 0x7F (back to knob mode) or p >= 0x12D: stock only,
 @ the lanes stay. Otherwise the stock load runs first, then the hook reads
 @ the tail record. Magic, version, CRC and preset checksum all match: copy
 @ lanes, bases, HASREC and BASESET into RAM. Else: clear them.
@@ -432,6 +436,17 @@ P_end:
     .align 2
     .thumb_func
 LDHOOK:
+    push {r0, r1, r4, lr}
+    ldr  r4, =RAMB
+    ldrh r0, [r4, #O_MAGIC]
+    movw r1, #MAGICV
+    cmp  r0, r1
+    bne  L_arm                     @ lane RAM not initialised
+    movs r0, #0
+    strb r0, [r4, #O_ARMED]        @ live recording off
+    bl   LED_OFF                   @ clobbers r0-r3, r12
+L_arm:
+    pop  {r0, r1, r4, lr}
     .if DEBUG
     ldr  r1, =RAMB
     ldrb r2, [r1, #O_LDCNT]
