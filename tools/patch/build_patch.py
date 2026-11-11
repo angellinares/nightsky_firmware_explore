@@ -167,7 +167,9 @@ def main():
     syx = syx_encode.build_full(tpl, bytes(img), region_crc=crc)
     open(OUT_SYX, "wb").write(syx)
     back = syx_fw.decode(syx)
-    print(f"  {OUT_SYX}: {len(syx)} bytes; decode round-trip ok = {back == bytes(img)}")
+    if back != bytes(img):
+        raise SystemExit("the .syx does not decode back to the patched image")
+    print(f"  {OUT_SYX}: {len(syx)} bytes; decode round-trip ok")
 
     print("[5] verify patched sites + cave")
     md = Cs(CS_ARCH_ARM, CS_MODE_THUMB)
