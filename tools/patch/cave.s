@@ -405,17 +405,13 @@ P_lon:
     movs r2, #0x18
     mla  r1, r0, r2, r1
     ldr  r1, [r1, #4]              @ current colour
-    ldrb r2, [r4, #O_LEDON]
-    cmp  r2, #1
-    beq  P_lchk
-    str  r1, [r4, #O_LEDSAV]       @ first poll while armed: save it
-    movs r2, #1
-    strb r2, [r4, #O_LEDON]
-P_lchk:
     ldr  r2, =PURPLE
     cmp  r1, r2
     beq  P_end                     @ already purple
+    str  r1, [r4, #O_LEDSAV]       @ the stock colour, also after a stock repaint
     mov  r1, r2
+    movs r2, #1
+    strb r2, [r4, #O_LEDON]
     ldr  r3, =LEDSET
     blx  r3
 P_end:
