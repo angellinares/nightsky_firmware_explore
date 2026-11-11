@@ -30,16 +30,17 @@ def open_ports():
     return mo, mi
 
 
-def send_cc(mo, value):
+def send_cc(mo, cc, value):
+    """Send CC on all 16 channels: the pedal's MIDI channel is not fixed."""
     for ch in range(16):
-        mo.send_message([0xB0 | ch, 0x7F, value])
+        mo.send_message([0xB0 | ch, cc, value])
         time.sleep(0.003)
 
 
 def ask(mo, mi, value, cmd, window=0.5):
     while mi.get_message():
         pass
-    send_cc(mo, value)
+    send_cc(mo, 0x7F, value)
     t0 = time.time()
     while time.time() - t0 < window:
         m = mi.get_message()
@@ -115,14 +116,12 @@ def main():
     mo, mi = open_ports()
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
     if mode == "clear":
-        send_cc(mo, 0x46)
+        send_cc(mo, 0x7F, 0x46)
         print("clear sent")
         return
     if mode == "led":                      # diag_read.py led 33
         n = int(sys.argv[2], 0)
-        for ch in range(16):
-            mo.send_message([0xB0 | ch, 0x7E, n])
-            time.sleep(0.003)
+        send_cc(mo, 0x7E, n)
         print(f"armed LED set to {n:#04x}")
         return
     status(mo, mi)

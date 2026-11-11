@@ -9,16 +9,11 @@ This tool reads 0x4FC..0x81B (25 chunks of 32 bytes, the last chunk runs
 into the next slot) with CC 124 = preset and CC 125 = chunk. Presets 0..127
 only. Needs a debug build (build_patch.py --debug). Quit the Strymon app first.
 """
-import sys
-from diag_read import open_ports, ask
+import binascii, struct, sys, time
+from diag_read import open_ports, send_cc, HDR
 
 SLOT_TAIL = 0x4FC
 CHUNKS = 25
-
-
-def send_cc(mo, cc, value):
-    for ch in range(16):
-        mo.send_message([0xB0 | ch, cc, value])
 
 
 def read_tail(mo, mi, preset):
@@ -39,8 +34,6 @@ def read_tail(mo, mi, preset):
 
 
 def ask_cc(mo, mi, chunk):
-    import time
-    from diag_read import HDR
     send_cc(mo, 0x7D, chunk)
     t0 = time.time()
     while time.time() - t0 < 0.5:
@@ -76,7 +69,6 @@ KNOBS = ["REVERB", "DRY", "DEPTH", "INTERVAL", "LOW CUT", "LENGTH",
 
 def print_record(r):
     """Decode the lane record at slot + 0x700 (persistence step 2)."""
-    import binascii, struct
     magic, ver, csum = struct.unpack_from("<HHI", r, 0)
     if magic != 0x4C4E:
         print("   no lane record")
